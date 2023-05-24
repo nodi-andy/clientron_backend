@@ -18,9 +18,10 @@ export const getProfiles = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   const { id } = req.params;
+  console.log("getProfile: " + id);
 
   try {
-      const profile = await ProfileModel.findById(id);
+      const profile = await User.findById(id);
       res.status(200).json(profile);
   } catch (error) {
       res.status(404).json({ message: error.message });
@@ -49,6 +50,38 @@ export const createProfile = async (req, res) => {
       await newProfile.save();
       console.log("newUser: " + newProfile);
       res.status(201).json(newProfile );
+    }
+
+  } catch (error) {
+    console.log("ERROR: " + error.message);
+    res.status(409).json({ message: error.message });
+  }
+}
+
+export const createGoogleUser = async (req, res) => {
+
+  console.log("createGoogleProfile: " + JSON.stringify(req.body));
+  try {
+    const newUser = new User({
+      name: req.body.name,
+      email: req.body.email,
+      userID: req.body.userId,
+      customers: [],
+      password: "google",
+      logo: req.body.logo,
+      createdAt: new Date().toISOString() ,
+      type: "google"
+    })
+    console.log("createProfile: " + JSON.stringify(newUser));
+    const existingUser = await User.findOne({ email: newUser.email })
+
+    if(existingUser) {
+      console.log("existingUser: " + existingUser);
+      res.status(201).json(existingUser );
+    } else {
+      await newUser.save();
+      console.log("newUser: " + newUser);
+      res.status(201).json(newUser );
     }
 
   } catch (error) {

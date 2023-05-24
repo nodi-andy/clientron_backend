@@ -12,20 +12,12 @@ const USER =  process.env.SMTP_USER
 const PASS =  process.env.SMTP_PASS
 
 import User from '../models/userModel.js'
-import ProfileModel from '../models/ProfileModel.js';
 
 
-export const signin = async (req, res)=> {
+export const signin = async (req, res) => {
     const { email, password } = req.body //Coming from formData
 
     try {
-        const existingUser = await User.findOne({ email })
-        
-        //get userprofile and append to login auth detail
-        const userProfile = await ProfileModel.findOne({ userId: existingUser?._id })
-
-        if(!existingUser) return res.status(404).json({ message: "User doesn't exist" })
-
         const isPasswordCorrect  = await bcrypt.compare(password, existingUser.password)
 
         if(!isPasswordCorrect) return res.status(400).json({message: "Invalid credentials"})
@@ -41,9 +33,7 @@ export const signin = async (req, res)=> {
     }
 }
 
-
-
-export const signup = async (req, res)=> {
+export const signup = async (req, res) => {
     const { email, password, confirmPassword, firstName, lastName, bio } = req.body
 
     try {
@@ -66,24 +56,9 @@ export const signup = async (req, res)=> {
         res.status(200).json({ result, token })
 
     } catch (error) {
-        res.status(500).json({ message: "Something went wrong"}) 
+        res.status(500).json({ message: "SignUp error"}) 
     }
 }
-
-
-// export const updateProfile = async (req, res) => {
-//     const formData = req.body
-//     const { id: _id } = req.params
-//     console.log(formData)
-
-//     if(!mongoose.Types.ObjectId.isValid(_id)) return res.status(404).send('No user with this id found')
-
-//     const updatedUser = await User.findByIdAndUpdate(_id, formData, {new: true})
-//     res.json(updatedUser)
-// }
-
-
-
 
 export const forgotPassword = (req,res)=>{
 
@@ -137,7 +112,7 @@ export const forgotPassword = (req,res)=>{
   
   
   
-  export const resetPassword = (req,res)=>{
+export const resetPassword = (req,res) => {
     const newPassword = req.body.password
     const sentToken = req.body.token
     User.findOne({resetToken:sentToken,expireToken:{$gt:Date.now()}})
@@ -146,14 +121,14 @@ export const forgotPassword = (req,res)=>{
             return res.status(422).json({error:"Try again session expired"})
         }
         bcrypt.hash(newPassword,12).then(hashedpassword=>{
-           user.password = hashedpassword
-           user.resetToken = undefined
-           user.expireToken = undefined
-           user.save().then((saveduser)=>{
-               res.json({message:"password updated success"})
-           })
+            user.password = hashedpassword
+            user.resetToken = undefined
+            user.expireToken = undefined
+            user.save().then((saveduser)=>{
+                res.json({message:"password updated success"})
+            })
         })
     }).catch(err=>{
         console.log(err)
     })
-  }
+}

@@ -43,9 +43,6 @@ export const getInvoices = async (req, res) => {
     
 }
 
-
-
-
 export const createInvoice = async (req, res) => {
 
     const invoice = req.body
