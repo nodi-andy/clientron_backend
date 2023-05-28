@@ -16,17 +16,20 @@ import User from '../models/userModel.js'
 
 export const signin = async (req, res) => {
     const { email, password } = req.body //Coming from formData
+    console.log("Signin" + email, password);
 
     try {
+        const existingUser = await User.findOne({ email })
         const isPasswordCorrect  = await bcrypt.compare(password, existingUser.password)
 
         if(!isPasswordCorrect) return res.status(400).json({message: "Invalid credentials"})
 
         //If crednetials are valid, create a token for the user
         const token = jwt.sign({ email: existingUser.email, id: existingUser._id }, SECRET, { expiresIn: "1h" })
+        console.log("Token:" + token);
         
         //Then send the token to the client/frontend
-        res.status(200).json({ result: existingUser, userProfile, token })
+        res.status(200).json({ result: existingUser, token })
 
     } catch (error) {
         res.status(500).json({ message: "Something went wrong"})
