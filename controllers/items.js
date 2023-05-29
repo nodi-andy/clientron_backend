@@ -18,7 +18,7 @@ export const getItem = async (req, res) => {
 
         const item = await ItemModel.findOne(query).populate({
             path: 'requests',
-            match: { state: 'open' }
+            match: { state: { $in: ['open', 'accepted'] }  }
         });
         console.log("Got item: " + JSON.stringify(item));
         res.status(200).json(item);
@@ -40,7 +40,6 @@ export const getItems = async (req, res) => {
         res.status(404).json({ message: error.message });
     }
 }
-
 
 export const addItem = async (req, res) => {
     try {
@@ -132,6 +131,28 @@ export const updateRequest = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         res.status(409).json(error.message)
+    }
+}
+
+export const getRequests = async (req, res) => { 
+    try {
+        const filter = req.body
+        console.log("Get requests: " + JSON.stringify(filter));
+
+        const reqs = await RequestModel.find(filter)
+        console.log("Requests: " + JSON.stringify(reqs));
+
+        const requestIds = reqs.map(request => mongoose.Types.ObjectId(request._id));
+        console.log("Request Ids: " + JSON.stringify(requestIds));
+        const items = await ItemModel.find({ requests: { $in: requestIds } }).populate({
+            path: 'requests',
+            match: filter
+        });;
+        console.log("Items: " + JSON.stringify(items));
+        
+        res.status(200).json(items);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
     }
 }
 

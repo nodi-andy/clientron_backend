@@ -6,7 +6,7 @@ const RequestSchema = mongoose.Schema({
     creator: String,
     state: {
         type: String,
-        enum: ["open", "accepted", "declined", "removed"]
+        enum: ["open", "accepted", "declined", "removed", "done"]
     },
     createdAt: {
         type: Date,
